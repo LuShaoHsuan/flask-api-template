@@ -1,0 +1,42 @@
+version: '3'
+services:
+  flask_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_app
+    ports:
+      - 5000:5000
+    networks:
+      custom-networks:
+        aliases:
+          - flask_app
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    container_name: postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: db_name
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    networks:
+      - custom-networks
+  nginx:
+    image: nginx:1.16.1
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    networks:
+      - custom-networks
+    depends_on:
+      - flask_app
+
+networks:
+  custom-networks:
